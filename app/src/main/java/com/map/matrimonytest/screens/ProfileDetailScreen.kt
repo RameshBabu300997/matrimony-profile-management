@@ -59,7 +59,7 @@ fun ProfileInfoCard(profile: ProfileEntity, modifier: Modifier = Modifier) {
                 Text(
                     text = "${profile.age} Yrs, ${profile.height}, ${profile.caste},",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Normal,
                 )
                 Row(horizontalArrangement = Arrangement.Start) {
                     Text(
@@ -67,14 +67,14 @@ fun ProfileInfoCard(profile: ProfileEntity, modifier: Modifier = Modifier) {
                         fontSize = 16.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Normal,
                     )
                     Text(
                         text = "${profile.state}, ${profile.country}",
                         fontSize = 16.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Normal,
                     )
                 }
             }

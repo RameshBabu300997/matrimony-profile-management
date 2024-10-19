@@ -1,6 +1,5 @@
 package com.map.matrimonytest.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -27,6 +26,7 @@ import com.google.gson.Gson
 import com.map.matrimonytest.R
 import com.map.matrimonytest.db.entity.ProfileEntity
 import com.map.matrimonytest.screens.viewmodel.ProfileViewModel
+import com.map.matrimonytest.utils.Helper
 
 @Composable
 fun HomeScreen(navController: NavController, gson: Gson, viewModel: ProfileViewModel) {
@@ -55,9 +55,8 @@ fun HomeScreen(navController: NavController, gson: Gson, viewModel: ProfileViewM
     }
 }
 
-
 @Composable
-fun HeaderSection(navController: NavController, gson: Gson, viewModel: ProfileViewModel) {
+fun HeaderSection(navController: NavController) {
     val expanded  =  remember { mutableStateOf(false) }
 
     Row(
@@ -103,7 +102,7 @@ fun HeaderSection(navController: NavController, gson: Gson, viewModel: ProfileVi
 
 // Load all the pending profiles list
 @Composable
-fun ProfileCard(profile: ProfileEntity, onNoClick:
+fun ProfileCard(profile: ProfileEntity, onRemoveProfile:
     () -> Unit, navController: NavController, gson: Gson) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -139,21 +138,21 @@ fun ProfileCard(profile: ProfileEntity, onNoClick:
                     Text(
                         text = "${profile.age} Yrs, ${profile.height}, ${profile.caste}",
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Normal,
                     )
                     Text(
                         text = "${profile.profession}, ${profile.location}",
                         fontSize = 14.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Normal,
                     )
                     Text(
-                        text = "${profile.state},${profile.country}",
+                        text = "${profile.state}, ${profile.country}",
                         fontSize = 14.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Normal,
                     )
                 }
             }
@@ -166,7 +165,7 @@ fun ProfileCard(profile: ProfileEntity, onNoClick:
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color(0xFFFFC107),
                     ),
-                    onClick = { /* Yes button clicked */ },
+                    onClick = { onRemoveProfile() },
                     modifier = Modifier
                         .width(80.dp)
                         .padding(end = 4.dp),
@@ -182,7 +181,7 @@ fun ProfileCard(profile: ProfileEntity, onNoClick:
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.White,
                     ),
-                    onClick = { onNoClick() },
+                    onClick = { onRemoveProfile() },
                     modifier = Modifier
                         .width(80.dp)
                         .border(
@@ -209,7 +208,7 @@ fun ProfileList(profiles: List<ProfileEntity>, onProfileRemoved: (Int) -> Unit,
         modifier = Modifier.fillMaxWidth()
     ) {
         items(profiles) { profile ->
-            ProfileCard(profile = profile, onNoClick = { onProfileRemoved(profile.id) },
+            ProfileCard(profile = profile, onRemoveProfile = { onProfileRemoved(profile.id) },
                 navController, gson)
         }
     }
@@ -238,11 +237,12 @@ fun NewBadge(count: Int) {
 @Composable
 fun ProfileScreen(navController: NavController, gson: Gson, viewModel:ProfileViewModel) {
     val profiles by viewModel.pendingProfiles.observeAsState(emptyList())
+    val removeTxt =  stringResource(R.string.txt_remove_profile)
 
     Column( modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
-        HeaderSection(navController, gson, viewModel)
+        HeaderSection(navController)
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             horizontalArrangement = Arrangement.Start,
@@ -262,7 +262,7 @@ fun ProfileScreen(navController: NavController, gson: Gson, viewModel:ProfileVie
         val context = LocalContext.current;
 
         ProfileList(profiles = profiles, onProfileRemoved = { profileId ->
-            Toast.makeText(context, "Profile removed successfully", Toast.LENGTH_SHORT).show()
+            Helper.showToast(context, removeTxt)
             viewModel._pendingProfiles.value = profiles.filter { it.id != profileId }
         }, navController, gson)
     }

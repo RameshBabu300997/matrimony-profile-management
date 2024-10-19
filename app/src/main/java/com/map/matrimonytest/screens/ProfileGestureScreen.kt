@@ -1,6 +1,5 @@
 package com.map.matrimonytest.screens
 
-import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -40,6 +39,7 @@ import androidx.navigation.NavController
 import com.map.matrimonytest.R
 import com.map.matrimonytest.db.entity.ProfileEntity
 import com.map.matrimonytest.screens.viewmodel.ProfileViewModel
+import com.map.matrimonytest.utils.Helper
 import kotlinx.coroutines.launch
 import java.lang.Math.abs
 
@@ -117,6 +117,7 @@ fun ProfileGestureScreen(navController: NavController, viewModel: ProfileViewMod
 @Composable
 fun CardStack(viewModel: ProfileViewModel) {
     val profileDetails: List<ProfileEntity> by viewModel.dailyRecommendations.observeAsState(emptyList())
+    val removeTxt =  stringResource(R.string.txt_remove_profile)
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -127,12 +128,12 @@ fun CardStack(viewModel: ProfileViewModel) {
                 val context = LocalContext.current
                 DraggableCard(
                     card = profileDetails[i],
-                    onShortlistClick = { profileId ->
-                        Toast.makeText(context, "Profile removed successfully", Toast.LENGTH_SHORT).show()
+                    onRemoveProfile = { profileId ->
+                        Helper.showToast(context, removeTxt)
                         viewModel.removeProfile(profileId)
                     },
                     onCardSwiped = {
-                        Toast.makeText(context, "Profile removed successfully", Toast.LENGTH_SHORT).show()
+                        Helper.showToast(context, removeTxt)
                     },
                     modifier = Modifier
                         .offset(y = (-i * 20).dp)
@@ -147,7 +148,7 @@ fun CardStack(viewModel: ProfileViewModel) {
 @Composable
 fun DraggableCard(
     card: ProfileEntity,
-    onShortlistClick: (Int) -> Unit,
+    onRemoveProfile: (Int) -> Unit,
     onCardSwiped: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -198,12 +199,12 @@ fun DraggableCard(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            CardView(card, onShortlistClick, card.id)
+            CardView(card, onRemoveProfile, card.id)
         }
     }
 }
 @Composable
-fun CardView(profile: ProfileEntity, onShortlistClick: (Int) -> Unit, profileId:Int) {
+fun CardView(profile: ProfileEntity, onRemoveProfile: (Int) -> Unit, profileId:Int) {
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
@@ -266,21 +267,21 @@ fun CardView(profile: ProfileEntity, onShortlistClick: (Int) -> Unit, profileId:
                 Text(
                     text = "${profile.age} Yrs, ${profile.height}, ${profile.profession}",
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Normal,
                 )
                 Text(
                     text = "${profile.caste}, ${profile.location}",
                     fontSize = 14.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Normal,
                 )
                 Text(
                     text = profile.state,
                     fontSize = 14.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Normal,
                 )
             }
             Divider(
@@ -320,7 +321,7 @@ fun CardView(profile: ProfileEntity, onShortlistClick: (Int) -> Unit, profileId:
                             modifier = Modifier
                                 .size(32.dp)
                                 .background(Color.White, CircleShape)
-                                .clickable { onShortlistClick(profileId) },
+                                .clickable { onRemoveProfile(profileId) },
                             contentAlignment = Alignment.Center
                         ) {
                             Canvas(modifier = Modifier.size(32.dp)) {
@@ -342,7 +343,7 @@ fun CardView(profile: ProfileEntity, onShortlistClick: (Int) -> Unit, profileId:
                                 .width(50.dp)
                                 .height(32.dp)
                                 .background(Color(0xFFFFC107), CircleShape)
-                                .clickable { onShortlistClick(profileId) },
+                                .clickable { onRemoveProfile(profileId) },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(

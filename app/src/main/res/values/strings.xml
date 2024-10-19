@@ -16,4 +16,5 @@
     <string name="txt_like">Like her?</string>
     <string name="txt_cancel">Cancel</string>
     <string name="txt_accept">Accept</string>
+    <string name="txt_remove_profile">Profile removed successfully</string>
 </resources>
