@@ -2,10 +2,11 @@ package com.map.matrimonytest.screens
 
 import android.widget.Toast
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,55 +14,72 @@ import androidx.compose.material.*
 import androidx.compose.material3.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.map.matrimonytest.R
 import com.map.matrimonytest.db.entity.ProfileEntity
 import com.map.matrimonytest.screens.viewmodel.ProfileViewModel
+import kotlinx.coroutines.launch
+import java.lang.Math.abs
 
 @Composable
 fun ProfileGestureScreen(navController: NavController, viewModel: ProfileViewModel) {
-    Column {
+    LaunchedEffect(Unit) {
+        viewModel.getDailyRecommendations()
+    }
+    Card(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        elevation = 8.dp
+    ) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Background with partial green and partial white
             Column(modifier = Modifier.fillMaxSize()) {
-                // Green top section with Back Arrow and Title
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp) // Green top section
-                        .background(Color(0xFF4CAF50))
+                        .height(300.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF49e680),
+                                    Color(0xFF25c4aa),
+                                )
+                            )
+                        )
                 ) {
-                    // Top Row for Back Arrow and Title
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Back Arrow
                         Image(
-                            painter = painterResource(id = R.drawable.ic_baseline_arrow_back), // Replace with your back arrow drawable
-                            contentDescription = "Back",
+                            painter = painterResource(id = R.drawable.ic_baseline_arrow_back),
+                            contentDescription = stringResource(R.string.txt_back),
                             modifier = Modifier
                                 .size(24.dp)
                                 .clickable {
@@ -71,7 +89,7 @@ fun ProfileGestureScreen(navController: NavController, viewModel: ProfileViewMod
                         Spacer(modifier = Modifier.width(16.dp))
                         // Title
                         Text(
-                            text = "Daily Recommendations",
+                            text = stringResource(R.string.txt_daily_recommendation),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -82,17 +100,15 @@ fun ProfileGestureScreen(navController: NavController, viewModel: ProfileViewMod
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.White) // White bottom section
+                        .background(Color(0xFFF3F3F3))
                 )
             }
-
-            // The CardStack will be placed on top, overlapping both green and white sections
             Box(
                 modifier = Modifier
                     .fillMaxSize(),
                 contentAlignment = Alignment.TopCenter
             ) {
-                CardStack(viewModel) // Card stack content
+                CardStack(viewModel)
             }
         }
     }
@@ -100,26 +116,26 @@ fun ProfileGestureScreen(navController: NavController, viewModel: ProfileViewMod
 
 @Composable
 fun CardStack(viewModel: ProfileViewModel) {
-    var profiledetails = viewModel.allProfiles.value
+    val profileDetails: List<ProfileEntity> by viewModel.dailyRecommendations.observeAsState(emptyList())
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        // Iterate and draw the cards in reverse order to simulate stack
-
-        if (!profiledetails.isNullOrEmpty()) {
-            for (i in profiledetails.indices.reversed()) {
+        if (!profileDetails.isNullOrEmpty()) {
+            for (i in profileDetails.indices.reversed()) {
                 val context = LocalContext.current
                 DraggableCard(
-                    card = profiledetails[i],
-                    cardIndex = i,
-                    onShortlistClick = {
-                        Toast.makeText(context, "Profile Removed", Toast.LENGTH_SHORT).show()
-
+                    card = profileDetails[i],
+                    onShortlistClick = { profileId ->
+                        Toast.makeText(context, "Profile removed successfully", Toast.LENGTH_SHORT).show()
+                        viewModel.removeProfile(profileId)
+                    },
+                    onCardSwiped = {
+                        Toast.makeText(context, "Profile removed successfully", Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier
-                        .offset(y = (-i * 20).dp)  // Apply negative offset to stack from top down
+                        .offset(y = (-i * 20).dp)
                         .scale(1f - i * 0.05f)
                 )
             }
@@ -129,7 +145,12 @@ fun CardStack(viewModel: ProfileViewModel) {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun DraggableCard(card: ProfileEntity, cardIndex: Int, onShortlistClick: () -> Unit, modifier: Modifier = Modifier) {
+fun DraggableCard(
+    card: ProfileEntity,
+    onShortlistClick: (Int) -> Unit,
+    onCardSwiped: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val swipeThreshold = with(LocalDensity.current) { 150.dp.toPx() }
     val offsetX = remember { Animatable(0f) }
     val offsetY = remember { Animatable(0f) }
@@ -142,97 +163,132 @@ fun DraggableCard(card: ProfileEntity, cardIndex: Int, onShortlistClick: () -> U
         Box(
             modifier = modifier
                 .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = {
-                            // Handle tap if needed, else just do nothing
+                    detectDragGestures(
+                        onDragEnd = {
+                            if (abs(offsetX.value) > swipeThreshold) {
+                                coroutineScope.launch {
+                                    offsetX.animateTo(
+                                        if (offsetX.value > 0) swipeThreshold * 2 else -swipeThreshold * 2
+                                    )
+                                    isDismissed = true
+                                    onCardSwiped()
+                                }
+                            } else {
+                                coroutineScope.launch {
+                                    offsetX.animateTo(0f)
+                                    offsetY.animateTo(0f)
+                                    rotation.animateTo(0f)
+                                }
+                            }
+                        },
+                        onDrag = { change, dragAmount ->
+                            change.consume() // Consume the gesture event
+                            coroutineScope.launch {
+                                offsetX.snapTo(offsetX.value + dragAmount.x)
+                                offsetY.snapTo(offsetY.value + dragAmount.y)
+                                rotation.snapTo((offsetX.value / swipeThreshold) * 15f) // Rotation effect
+                            }
                         }
                     )
-                },
+                }
+                .graphicsLayer(
+                    translationX = offsetX.value,
+                    translationY = offsetY.value,
+                    rotationZ = rotation.value,
+                ),
             contentAlignment = Alignment.Center
         ) {
-            CardView(card, onShortlistClick)
+            CardView(card, onShortlistClick, card.id)
         }
     }
 }
-
 @Composable
-fun CardView(card: ProfileEntity, onShortlistClick: () -> Unit) {
+fun CardView(profile: ProfileEntity, onShortlistClick: (Int) -> Unit, profileId:Int) {
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
-            .width(350.dp),
+            .width(320.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp) // Add bottom padding
+                .padding(bottom = 16.dp)
         ) {
-            // Profile Image
             Image(
-                painter = painterResource(id = card.imageResId), // Replace with actual image resource
-                contentDescription = "Profile Image",
+                painter = painterResource(id = profile.imageResId),
+                contentDescription = stringResource(id = R.string.profile_image),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp)
             )
-
-            // Verified and Premium Icons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Verified indicator
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Verified",
-                        tint = Color.Green
+                        painter = painterResource(id = R.drawable.ic_verified_icon),
+                        contentDescription = stringResource(R.string.txt_verified),
+                        tint = Color.Blue
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Verified", fontSize = 12.sp)
+                    Text(
+                        stringResource(R.string.txt_verified),
+                        fontSize = 12.sp,
+                        color = Color.Blue)
                 }
-
                 // Space between Verified and Premium
-                Spacer(modifier = Modifier.width(16.dp))
-
+                Spacer(modifier = Modifier.width(4.dp))
                 // Premium indicator
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Premium",
-                        tint = Color(0xFFFFD700) // Gold color
+                        painter = painterResource(id = R.drawable.ic_premium_icon),
+                        contentDescription = stringResource(R.string.txt_premium),
+                        tint = Color(0xFFB87DF0)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Premium", fontSize = 12.sp)
+                    Text(stringResource(R.string.txt_premium), fontSize = 12.sp, color = Color(0xFFB87DF0) )
                 }
             }
-
-            // Basic Info
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(text = card.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(text = "27 years, 5'5\"", fontSize = 14.sp)
-                Text(text = "Software Engineer", fontSize = 14.sp)
-                Text(text = "Mumbai, Maharashtra", fontSize = 14.sp)
+            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Text(
+                    text = profile.name,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "${profile.age} Yrs, ${profile.height}, ${profile.profession}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                )
+                Text(
+                    text = "${profile.caste}, ${profile.location}",
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.Medium,
+                )
+                Text(
+                    text = profile.state,
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.Medium,
+                )
             }
-
-            // Divider
             Divider(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 color = Color.LightGray
             )
-
-            // Updated row with shortlist and action buttons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -240,58 +296,58 @@ fun CardView(card: ProfileEntity, onShortlistClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Shortlist button
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable { }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Shortlist",
-                        tint = Color.Gray
+                        painterResource(id = R.drawable.ic_shortlist_icon),
+                        contentDescription = stringResource(R.string.txt_shortlist),
+                        tint = Color.Gray,
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Shortlist", color = Color.Gray)
+                    Text(stringResource(R.string.txt_shortlist), color = Color.Black, fontSize = 12.sp)
                 }
-
-                // Like her? text and action buttons
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Like her?", color = Color.Gray, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.txt_like), color = Color.Black, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(8.dp)) // Reduced space
-
-                    // Action buttons
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp) // Reduced space between icons
                     ) {
-                        // Cancel button
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
-                                .background(Color.Red, CircleShape)
-                                .clickable { onShortlistClick() },
+                                .background(Color.White, CircleShape)
+                                .clickable { onShortlistClick(profileId) },
                             contentAlignment = Alignment.Center
                         ) {
+                            Canvas(modifier = Modifier.size(32.dp)) {
+                                drawCircle(
+                                    color = Color.Gray,
+                                    radius = size.minDimension / 2,
+                                    style = Stroke(width = 1.dp.toPx())
+                                )
+                            }
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Cancel",
-                                tint = Color.White,
+                                contentDescription = stringResource(R.string.txt_cancel),
+                                tint = Color.Gray,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
-
-                        // Tick button
                         Box(
                             modifier = Modifier
-                                .size(32.dp)
-                                .background(Color.Green, CircleShape)
-                                .clickable { onShortlistClick() },
+                                .width(50.dp)
+                                .height(32.dp)
+                                .background(Color(0xFFFFC107), CircleShape)
+                                .clickable { onShortlistClick(profileId) },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Check,
-                                contentDescription = "Accept",
+                                contentDescription = stringResource(R.string.txt_accept),
                                 tint = Color.White,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -302,6 +358,3 @@ fun CardView(card: ProfileEntity, onShortlistClick: () -> Unit) {
         }
     }
 }
-
-
-data class CardModel(val name: String, val details: String, val imageResId:Int)

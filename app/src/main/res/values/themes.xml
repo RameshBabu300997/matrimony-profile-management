@@ -4,4 +4,7 @@
     <style name="Theme.MatrimonyTest" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@color/purple_700</item>
     </style>
+
+    <dimen name="card_corner_radius">16</dimen>
+    <dimen name="card_elevation">16</dimen>
 </resources>

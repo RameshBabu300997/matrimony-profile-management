@@ -21,7 +21,8 @@ class ProfileDetails {
             state = "Tamil Nadu",
             country = "India",
             zodiac = "Poosam",
-            imageIds = "${R.drawable.ic_profile_photo1},${R.drawable.ic_profile_photo4}"
+            imageIds = "${R.drawable.ic_profile_photo1},${R.drawable.ic_profile_photo4}",
+            isDailyRecommendation = false
             ))
 
             profileDetails.add(ProfileEntity(
@@ -36,7 +37,8 @@ class ProfileDetails {
                 state = "Tamil Nadu",
                 country = "India",
                 zodiac = "Leo",
-                imageIds = "${R.drawable.ic_profile_photo2},${R.drawable.ic_profile_photo5}"
+                imageIds = "${R.drawable.ic_profile_photo2},${R.drawable.ic_profile_photo5}",
+                isDailyRecommendation = false
             ))
 
             profileDetails.add(ProfileEntity(
@@ -51,7 +53,8 @@ class ProfileDetails {
                 state = "Tamil Nadu",
                 country = "India",
                 zodiac = "Poosam",
-                imageIds = "${R.drawable.ic_profile_photo3},${R.drawable.ic_profile_photo6}"
+                imageIds = "${R.drawable.ic_profile_photo3},${R.drawable.ic_profile_photo6}",
+                isDailyRecommendation = false
             ))
 
 
@@ -62,14 +65,14 @@ class ProfileDetails {
                 height = "5ft 1 in",
                 profession = "Software Engineer",
                 location = "Chennai",
-                imageResId = R.drawable.ic_profile_photo1,
+                imageResId = R.drawable.ic_profile_photo7,
                 caste = "Tamil, Nair",
                 state = "Tamil Nadu",
                 country = "India",
                 zodiac = "Poosam",
-                imageIds = "${R.drawable.ic_profile_photo1},${R.drawable.ic_profile_photo4}"
+                imageIds = "${R.drawable.ic_profile_photo7},${R.drawable.ic_profile_photo8}",
+                isDailyRecommendation = false
             ))
-
 
             profileDetails.add(ProfileEntity(
                 id = 5,
@@ -78,12 +81,45 @@ class ProfileDetails {
                 height = "5ft 1 in",
                 profession = "MBBS, Doctor",
                 location = "Chennai",
-                imageResId = R.drawable.ic_profile_photo1,
+                imageResId = R.drawable.ic_profile_photo9,
                 caste = "Tamil, Nair",
                 state = "Tamil Nadu",
                 country = "India",
                 zodiac = "Leo",
-                imageIds = "${R.drawable.ic_profile_photo1},${R.drawable.ic_profile_photo4}"
+                imageIds = "${R.drawable.ic_profile_photo9},${R.drawable.ic_profile_photo10}",
+                isDailyRecommendation = false
+            ))
+
+            profileDetails.add(ProfileEntity(
+                id = 6,
+                name ="Nandhini",
+                age = 25,
+                height = "5ft 1 in",
+                profession = "Senior Software Engineer",
+                location = "Chennai",
+                imageResId = R.drawable.ic_profile_photo12,
+                caste = "Tamil, Nair",
+                state = "Tamil Nadu",
+                country = "India",
+                zodiac = "Leo",
+                imageIds = "${R.drawable.ic_profile_photo12},",
+                isDailyRecommendation = true
+            ))
+
+            profileDetails.add(ProfileEntity(
+                id = 7,
+                name ="Nadhiya",
+                age = 27,
+                height = "5ft 1 in",
+                profession = "Hiring Manager",
+                location = "Chennai",
+                imageResId = R.drawable.ic_profile_photo13,
+                caste = "Tamil, Nair",
+                state = "Tamil Nadu",
+                country = "India",
+                zodiac = "Leo",
+                imageIds = "${R.drawable.ic_profile_photo13},",
+                isDailyRecommendation = true
             ))
         }
     }

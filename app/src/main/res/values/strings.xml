@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">MatrimonyTest</string>
+    <string name="my_matches">My Matches</string>
+    <string name="menu_icon">Menu Icon</string>
+    <string name="details">Details</string>
+    <string name="profile_image">Profile Image</string>
+    <string name="txt_yes">Yes</string>
+    <string name="txt_no">No</string>
+    <string name="back">Back</string>
+    <string name="txt_profile">Profile</string>
+    <string name="txt_back">Back</string>
+    <string name="txt_daily_recommendation">Daily Recommendations</string>
+    <string name="txt_verified">Verified</string>
+    <string name="txt_premium">Premium NRI</string>
+    <string name="txt_shortlist">Shortlist</string>
+    <string name="txt_like">Like her?</string>
+    <string name="txt_cancel">Cancel</string>
+    <string name="txt_accept">Accept</string>
 </resources>

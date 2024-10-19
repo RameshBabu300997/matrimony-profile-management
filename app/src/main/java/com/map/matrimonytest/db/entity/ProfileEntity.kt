@@ -17,4 +17,5 @@ data class ProfileEntity(
     val country: String,
     val imageIds: String,
     val zodiac : String,
+    val isDailyRecommendation: Boolean
 )

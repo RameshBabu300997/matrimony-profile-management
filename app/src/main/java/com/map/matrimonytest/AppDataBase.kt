@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.map.matrimonytest.db.dao.ProfileDao
 import com.map.matrimonytest.db.entity.ProfileEntity
 
-@Database(entities = [ProfileEntity::class], version = 5, exportSchema = false)
+@Database(entities = [ProfileEntity::class], version = 9, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun profileDao(): ProfileDao
 

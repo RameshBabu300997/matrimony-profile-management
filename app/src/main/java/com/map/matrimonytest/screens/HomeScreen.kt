@@ -1,31 +1,28 @@
 package com.map.matrimonytest.screens
 
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
 import com.google.gson.Gson
 import com.map.matrimonytest.R
 import com.map.matrimonytest.db.entity.ProfileEntity
@@ -33,23 +30,35 @@ import com.map.matrimonytest.screens.viewmodel.ProfileViewModel
 
 @Composable
 fun HomeScreen(navController: NavController, gson: Gson, viewModel: ProfileViewModel) {
+    val isLoading by viewModel.loading.observeAsState(true)
     LaunchedEffect(Unit) {
         viewModel.getAllProfiles()
     }
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF87CEEB))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF3699e0),
+                        Color(0xFF0d70b8),
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        ProfileScreen(navController, gson, viewModel)
+        if (isLoading) {
+            CircularProgressIndicator(color = Color.White)
+        } else {
+            ProfileScreen(navController, gson, viewModel)
+        }
     }
 }
 
 
 @Composable
 fun HeaderSection(navController: NavController, gson: Gson, viewModel: ProfileViewModel) {
-    val expanded  =  remember { mutableStateOf(false) } // State to control dropdown visibility
-    val profiles by viewModel.allProfiles.observeAsState(emptyList())
+    val expanded  =  remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -60,16 +69,15 @@ fun HeaderSection(navController: NavController, gson: Gson, viewModel: ProfileVi
     ) {
         Text(
             color = Color.White,
-            text = "My Matches",
-            fontSize = 20.sp,
+            text = stringResource(R.string.my_matches),
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
-        // Use Box to position dropdown relative to the icon
         Box {
             IconButton(onClick = { expanded.value = true }) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_more), // Replace with your menu icon resource
-                    contentDescription = "Menu Icon",
+                    painter = painterResource(id = R.drawable.ic_baseline_more),
+                    contentDescription = stringResource(R.string.menu_icon),
                     modifier = Modifier.size(24.dp),
                     tint = Color.White
                 )
@@ -80,21 +88,20 @@ fun HeaderSection(navController: NavController, gson: Gson, viewModel: ProfileVi
                 expanded = expanded.value,
                 onDismissRequest = { expanded.value = false },
                 modifier = Modifier
-                    .offset(y = 8.dp) // Offset to position it below the button
+                    .offset(y = 4.dp)
             ) {
                 DropdownMenuItem(onClick = {
-                    val profileJson = gson.toJson(profiles)
-                    navController.navigate("screen2") // Replace with your destination
+                    navController.navigate("screen2")
                     expanded.value = false // Dismiss menu
                 }) {
-                    Text("Details")
+                    Text(stringResource(R.string.details))
                 }
             }
         }
     }
 }
 
-
+// Load all the pending profiles list
 @Composable
 fun ProfileCard(profile: ProfileEntity, onNoClick:
     () -> Unit, navController: NavController, gson: Gson) {
@@ -114,10 +121,11 @@ fun ProfileCard(profile: ProfileEntity, onNoClick:
             ) {
                 Image(
                     painter = painterResource(profile.imageResId),
-                    contentDescription = "Profile Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxWidth()
-                        .height(300.dp),
+                    contentDescription = stringResource(R.string.profile_image),
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(260.dp),
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Column(modifier = Modifier.padding(8.dp)) {
@@ -131,49 +139,63 @@ fun ProfileCard(profile: ProfileEntity, onNoClick:
                     Text(
                         text = "${profile.age} Yrs, ${profile.height}, ${profile.caste}",
                         fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
                     )
                     Text(
                         text = "${profile.profession}, ${profile.location}",
                         fontSize = 14.sp,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.Medium,
                     )
                     Text(
                         text = "${profile.state},${profile.country}",
                         fontSize = 14.sp,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.Medium,
                     )
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(8.dp)
             ) {
                 Button(
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color.Yellow,
+                        backgroundColor = Color(0xFFFFC107),
                     ),
                     onClick = { /* Yes button clicked */ },
                     modifier = Modifier
-                        .width(50.dp)
-                        .weight(1f)
+                        .width(80.dp)
                         .padding(end = 4.dp),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Yes")
+                    Text(
+                        text = stringResource(R.string.txt_yes),
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
                 }
 
                 Button(
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.White,
+                    ),
                     onClick = { onNoClick() },
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 4.dp)
+                        .width(80.dp)
+                        .border(
+                            width = 1.dp,
+                            color = Color.LightGray,
+                            shape = CircleShape
+                        ),
+                    shape = RoundedCornerShape(24.dp),
                 ) {
-                    Text("No")
+                    Text(
+                        text = stringResource(R.string.txt_no),
+                        modifier = Modifier.padding(vertical = 6.dp)
+                    )
                 }
             }
         }
@@ -194,46 +216,54 @@ fun ProfileList(profiles: List<ProfileEntity>, onProfileRemoved: (Int) -> Unit,
 }
 
 @Composable
-fun NotificationBadge(count: Int) {
+fun NewBadge(count: Int) {
     Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(40.dp) // Adjust the size as needed
-            .background(Color.Red, shape = RoundedCornerShape(12.dp)), // Rounded badge
-        contentAlignment = Alignment.Center
+            .border(
+                border = BorderStroke(1.dp, Color.White),
+                shape = CircleShape
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(
-            text = "${count.toString()} New",
+            text = "$count NEW",
             color = Color.White,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp
         )
     }
 }
 
-
 @Composable
 fun ProfileScreen(navController: NavController, gson: Gson, viewModel:ProfileViewModel) {
-    val profiles by viewModel.allProfiles.observeAsState(emptyList())
+    val profiles by viewModel.pendingProfiles.observeAsState(emptyList())
 
     Column( modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
         HeaderSection(navController, gson, viewModel)
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "${profiles.size} Profiles pending with me",
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-        // Add the header at the top of the screen
-        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "${profiles.size} Profiles pending with me",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            NewBadge(count = profiles.size-2)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
 
         val context = LocalContext.current;
 
         ProfileList(profiles = profiles, onProfileRemoved = { profileId ->
-            Toast.makeText(context, "Profile removed", Toast.LENGTH_SHORT).show()
-            viewModel._allProfiles.value = profiles.filter { it.id != profileId }
+            Toast.makeText(context, "Profile removed successfully", Toast.LENGTH_SHORT).show()
+            viewModel._pendingProfiles.value = profiles.filter { it.id != profileId }
         }, navController, gson)
     }
 }
